@@ -12,6 +12,7 @@ LIBRESSL_VER=2.9.2
 OPENSSL_VER=1.1.1c
 LIBMAXMINDDB_VER=1.3.2
 GEOIP2_VER=3.2
+OWASP_VER=3.1.1
 
 # Define installation paramaters for headless install (fallback if unspecifed)
 if [[ "$HEADLESS" == "y" ]]; then
@@ -40,10 +41,11 @@ if [[ "$HEADLESS" != "y" ]]; then
 	echo "   1) Install or update Nginx"
 	echo "   2) Uninstall Nginx"
 	echo "   3) Update the script"
-	echo "   4) Exit"
+	echo "   4) Install OWASP ModSecurity ruleset"
+	echo "   5) Exit"
 	echo ""
-	while [[ $OPTION !=  "1" && $OPTION != "2" && $OPTION != "3" && $OPTION != "4" ]]; do
-		read -rp "Select an option [1-4]: " OPTION
+	while [[ $OPTION !=  "1" && $OPTION != "2" && $OPTION != "3" && $OPTION != "4" && $OPTION != "5" ]]; do
+		read -rp "Select an option [1-5]: " OPTION
 	done
 fi
 
@@ -371,9 +373,10 @@ case $OPTION in
 		/lib/systemd/system/nginx.service \
 		/etc/systemd/system/multi-user.target.wants/nginx.service
 
-		# Remove conf files
+		# Remove conf & OWASP files
 		if [[ "$RM_CONF" = 'y' ]]; then
-			rm -r /etc/nginx/
+			rm -r /etc/nginx/ \
+			/usr/local/owasp-modsecurity \
 		fi
 
 		# Remove logs
@@ -400,6 +403,30 @@ case $OPTION in
 		sleep 2
 		./nginx-autoinstall.sh
 		exit
+	;;
+	4) # OWASP ruleset installation
+		if [[ ! -d /etc/nginx/modsec ]]; then
+			echo "You need to install nginx with the ModSecurity 3 module beforehand."
+			exit
+		fi
+		wget -O owasp-modsecurity.tar.gz https://github.com/SpiderLabs/owasp-modsecurity-crs/archive/v${OWASP_VER}.tar.gz
+		tar -xf owasp-modsecurity.tar.gz
+		mv owasp-modsecurity-crs-${OWASP_VER} /usr/local/owasp-modsecurity
+		rm owasp-modsecurity.tar.gz
+		cd /usr/local/owasp-modsecurity || exit
+		cp crs-setup.conf.example crs-setup.conf
+		mv rules/REQUEST-910-IP-REPUTATION.conf rules/REQUEST-910-IP-REPUTATION.conf.example
+		wget -O /etc/nginx/modsec/main.conf https://raw.githubusercontent.com/theforcer/nginx-autoinstall/master/conf/main.conf
+		nginx -s reload
+		echo ""
+		echo "The ruleset has been successfully installed to /usr/local/owasp-modsecurity."
+		echo "Add the following config lines to your nginx vhosts to start blocking malicious traffic!"
+		echo ""
+		echo "	modsecurity on;"
+		echo "	modsecurity_rules_file /etc/nginx/modsec/main.conf;"
+		echo ""
+		echo "You can test for success with --> curl -H 'User-Agent: Nikto' http://example.com/ --> Should 403"
+		echo ""
 	;;
 	*) # Exit
 		exit
