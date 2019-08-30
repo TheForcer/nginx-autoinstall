@@ -6,12 +6,10 @@ if [[ "$EUID" -ne 0 ]]; then
 fi
 
 # Define versions
-NGINX_MAINLINE_VER=1.17.0
-NGINX_STABLE_VER=1.16.0
-LIBRESSL_VER=2.9.0
+NGINX_MAINLINE_VER=1.17.3
+NGINX_STABLE_VER=1.16.1
+LIBRESSL_VER=2.9.2
 OPENSSL_VER=1.1.1c
-NPS_VER=1.13.35.2
-HEADERMOD_VER=0.33
 LIBMAXMINDDB_VER=1.3.2
 GEOIP2_VER=3.2
 
@@ -19,9 +17,6 @@ GEOIP2_VER=3.2
 if [[ "$HEADLESS" == "y" ]]; then
 	OPTION=${OPTION:-1}
 	NGINX_VER=${NGINX_VER:-1}
-	PAGESPEED=${PAGESPEED:-n}
-	BROTLI=${BROTLI:-n}
-	HEADERMOD=${HEADERMOD:-n}
 	GEOIP=${GEOIP:-n}
 	FANCYINDEX=${FANCYINDEX:-n}
 	CACHEPURGE=${CACHEPURGE:-n}
@@ -84,15 +79,6 @@ case $OPTION in
 			echo "If you select none, Nginx will be installed with its default modules."
 			echo ""
 			echo "Modules to install :"
-			while [[ $PAGESPEED != "y" && $PAGESPEED != "n" ]]; do
-				read -p "       PageSpeed $NPS_VER [y/n]: " -e PAGESPEED
-			done
-			while [[ $BROTLI != "y" && $BROTLI != "n" ]]; do
-				read -p "       Brotli [y/n]: " -e BROTLI
-			done
-			while [[ $HEADERMOD != "y" && $HEADERMOD != "n" ]]; do
-				read -p "       Headers More $HEADERMOD_VER [y/n]: " -e HEADERMOD
-			done
 			while [[ $GEOIP != "y" && $GEOIP != "n" ]]; do
 				read -p "       GeoIP [y/n]: " -e GEOIP
 			done
@@ -145,34 +131,6 @@ case $OPTION in
 		# Dependencies
 		apt-get update
 		apt-get install -y build-essential ca-certificates wget curl libpcre3 libpcre3-dev autoconf unzip automake libtool tar git libssl-dev zlib1g-dev uuid-dev lsb-release libxml2-dev libxslt1-dev
-
-		# PageSpeed
-		if [[ "$PAGESPEED" = 'y' ]]; then
-			cd /usr/local/src/nginx/modules || exit 1
-			wget https://github.com/pagespeed/ngx_pagespeed/archive/v${NPS_VER}-stable.zip
-			unzip v${NPS_VER}-stable.zip
-			cd incubator-pagespeed-ngx-${NPS_VER}-stable || exit 1
-			psol_url=https://dl.google.com/dl/page-speed/psol/${NPS_VER}.tar.gz
-			[ -e scripts/format_binary_url.sh ] && psol_url=$(scripts/format_binary_url.sh PSOL_BINARY_URL)
-			wget "${psol_url}"
-			tar -xzvf "$(basename "${psol_url}")"
-		fi
-
-		#Brotli
-		if [[ "$BROTLI" = 'y' ]]; then
-			cd /usr/local/src/nginx/modules || exit 1
-			git clone https://github.com/eustas/ngx_brotli
-			cd ngx_brotli || exit 1
-			git checkout v0.1.2
-			git submodule update --init
-		fi
-
-		# More Headers
-		if [[ "$HEADERMOD" = 'y' ]]; then
-			cd /usr/local/src/nginx/modules || exit 1
-			wget https://github.com/openresty/headers-more-nginx-module/archive/v${HEADERMOD_VER}.tar.gz
-			tar xaf v${HEADERMOD_VER}.tar.gz
-		fi
 
 		# GeoIP
 		if [[ "$GEOIP" = 'y' ]]; then
@@ -238,7 +196,7 @@ case $OPTION in
 
 		# Download and extract of Nginx source code
 		cd /usr/local/src/nginx/ || exit 1
-		wget -qO- http://nginx.org/download/nginx-${NGINX_VER}.tar.gz | tar zxf -
+		wget -qO- https://nginx.org/download/nginx-${NGINX_VER}.tar.gz | tar zxf -
 		cd nginx-${NGINX_VER}
 
 		# As the default nginx.conf does not work, we download a clean and working conf from my GitHub.
@@ -246,7 +204,7 @@ case $OPTION in
 		if [[ ! -e /etc/nginx/nginx.conf ]]; then
 			mkdir -p /etc/nginx
 			cd /etc/nginx || exit 1
-			wget https://raw.githubusercontent.com/Angristan/nginx-autoinstall/master/conf/nginx.conf
+			wget https://raw.githubusercontent.com/theforcer/nginx-autoinstall/master/conf/nginx.conf
 		fi
 		cd /usr/local/src/nginx/nginx-${NGINX_VER} || exit 1
 
@@ -279,18 +237,6 @@ case $OPTION in
 		# Optional modules
 		if [[ "$LIBRESSL" = 'y' ]]; then
 			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo --with-openssl=/usr/local/src/nginx/modules/libressl-${LIBRESSL_VER})
-		fi
-
-		if [[ "$PAGESPEED" = 'y' ]]; then
-			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo "--add-module=/usr/local/src/nginx/modules/incubator-pagespeed-ngx-${NPS_VER}-stable")
-		fi
-
-		if [[ "$BROTLI" = 'y' ]]; then
-			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo "--add-module=/usr/local/src/nginx/modules/ngx_brotli")
-		fi
-
-		if [[ "$HEADERMOD" = 'y' ]]; then
-			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo "--add-module=/usr/local/src/nginx/modules/headers-more-nginx-module-${HEADERMOD_VER}")
 		fi
 
 		if [[ "$GEOIP" = 'y' ]]; then
@@ -331,14 +277,14 @@ case $OPTION in
 		# Using the official systemd script and logrotate conf from nginx.org
 		if [[ ! -e /lib/systemd/system/nginx.service ]]; then
 			cd /lib/systemd/system/ || exit 1
-			wget https://raw.githubusercontent.com/Angristan/nginx-autoinstall/master/conf/nginx.service
+			wget https://raw.githubusercontent.com/theforcer/nginx-autoinstall/master/conf/nginx.service
 			# Enable nginx start at boot
 			systemctl enable nginx
 		fi
 
 		if [[ ! -e /etc/logrotate.d/nginx ]]; then
 			cd /etc/logrotate.d/ || exit 1
-			wget https://raw.githubusercontent.com/Angristan/nginx-autoinstall/master/conf/nginx-logrotate -O nginx
+			wget https://raw.githubusercontent.com/theforcer/nginx-autoinstall/master/conf/nginx-logrotate -O nginx
 		fi
 
 		# Nginx's cache directory is not created by default
@@ -416,7 +362,7 @@ case $OPTION in
 		exit
 	;;
 	3) # Update the script
-		wget https://raw.githubusercontent.com/Angristan/nginx-autoinstall/master/nginx-autoinstall.sh -O nginx-autoinstall.sh
+		wget https://raw.githubusercontent.com/theforcer/nginx-autoinstall/master/nginx-autoinstall.sh -O nginx-autoinstall.sh
 		chmod +x nginx-autoinstall.sh
 		echo ""
 		echo "Update done."
