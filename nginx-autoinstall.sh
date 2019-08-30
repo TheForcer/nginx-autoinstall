@@ -94,6 +94,9 @@ case $OPTION in
 			while [[ $VTS != "y" && $VTS != "n" ]]; do
 				read -rp "       nginx VTS [y/n]: " -e VTS
 			done
+			while [[ $MODSEC != "y" && $MODSEC != "n" ]]; do
+				read -rp "       ModSecurity 3.0 [y/n]: " -e MODSEC
+			done			
 			echo ""
 			echo "Choose your OpenSSL implementation :"
 			echo "   1) System's OpenSSL ($(openssl version | cut -c9-14))"
@@ -168,6 +171,12 @@ case $OPTION in
 			git clone https://github.com/FRiCKLE/ngx_cache_purge
 		fi
 
+		# ModSecurity
+		if [[ "$MODSEC" = 'y' ]]; then
+			cd /usr/local/src/nginx/modules || exit 1
+			git clone --depth 1 https://github.com/SpiderLabs/modsecurity-nginx.git
+		fi
+
 		# LibreSSL
 		if [[ "$LIBRESSL" = 'y' ]]; then
 			cd /usr/local/src/nginx/modules || exit 1
@@ -205,6 +214,10 @@ case $OPTION in
 			mkdir -p /etc/nginx
 			cd /etc/nginx || exit 1
 			wget https://raw.githubusercontent.com/theforcer/nginx-autoinstall/master/conf/nginx.conf
+			if [[ "$MODSEC" = 'y' ]]; then
+				sed -i "s/#load_module/load_module/g" nginx.conf
+			fi
+			wget https://raw.githubusercontent.com/theforcer/nginfix/master/tls.conf
 		fi
 		cd /usr/local/src/nginx/nginx-${NGINX_VER} || exit 1
 
@@ -269,6 +282,24 @@ case $OPTION in
 		./configure $NGINX_OPTIONS $NGINX_MODULES
 		make -j "$(nproc)"
 		make install
+
+		if [[ "$MODSEC" = 'y' ]]; then
+			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo "--add-dynamic-module=/usr/local/src/nginx/modules/modsecurity-nginx")
+			./configure $NGINX_OPTIONS $NGINX_MODULES
+			make modules
+			if [[ ! -d /etc/nginx/modules ]]
+			then
+				mkdir -p /etc/nginx/modules
+			fi
+			if [[ ! -d /etc/nginx/modsec ]]
+			then
+				mkdir -p /etc/nginx/modsec
+				wget -O /etc/nginx/modsec/unicode.mapping https://raw.githubusercontent.com/SpiderLabs/ModSecurity/v3/master/unicode.mapping
+				wget -O /etc/nginx/modsec/modsecurity.conf https://raw.githubusercontent.com/SpiderLabs/ModSecurity/v3/master/modsecurity.conf-recommended
+				sed -i "s/SecRuleEngine DetectionOnly/SecRuleEngine On/" /etc/nginx/modsec/modsecurity.conf
+			fi
+			cp objs/ngx_http_modsecurity_module.so /etc/nginx/modules
+		fi
 
 		# remove debugging symbols
 		strip -s /usr/sbin/nginx
