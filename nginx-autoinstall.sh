@@ -43,7 +43,7 @@ if [[ "$HEADLESS" != "y" ]]; then
 	echo "   4) Exit"
 	echo ""
 	while [[ $OPTION !=  "1" && $OPTION != "2" && $OPTION != "3" && $OPTION != "4" ]]; do
-		read -p "Select an option [1-4]: " OPTION
+		read -rp "Select an option [1-4]: " OPTION
 	done
 fi
 
@@ -58,7 +58,7 @@ case $OPTION in
 			echo "   2) Mainline $NGINX_MAINLINE_VER"
 			echo ""
 			while [[ $NGINX_VER != "1" && $NGINX_VER != "2" ]]; do
-				read -p "Select an option [1-2]: " NGINX_VER
+				read -rp "Select an option [1-2]: " NGINX_VER
 			done
 		fi
 		case $NGINX_VER in
@@ -80,19 +80,19 @@ case $OPTION in
 			echo ""
 			echo "Modules to install :"
 			while [[ $GEOIP != "y" && $GEOIP != "n" ]]; do
-				read -p "       GeoIP [y/n]: " -e GEOIP
+				read -rp "       GeoIP [y/n]: " -e GEOIP
 			done
 			while [[ $FANCYINDEX != "y" && $FANCYINDEX != "n" ]]; do
-				read -p "       Fancy index [y/n]: " -e FANCYINDEX
+				read -rp "       Fancy index [y/n]: " -e FANCYINDEX
 			done
 			while [[ $CACHEPURGE != "y" && $CACHEPURGE != "n" ]]; do
-				read -p "       ngx_cache_purge [y/n]: " -e CACHEPURGE
+				read -rp "       ngx_cache_purge [y/n]: " -e CACHEPURGE
 			done
 			while [[ $WEBDAV != "y" && $WEBDAV != "n" ]]; do
-				read -p "       nginx WebDAV [y/n]: " -e WEBDAV
+				read -rp "       nginx WebDAV [y/n]: " -e WEBDAV
 			done
 			while [[ $VTS != "y" && $VTS != "n" ]]; do
-				read -p "       nginx VTS [y/n]: " -e VTS
+				read -rp "       nginx VTS [y/n]: " -e VTS
 			done
 			echo ""
 			echo "Choose your OpenSSL implementation :"
@@ -101,7 +101,7 @@ case $OPTION in
 			echo "   3) LibreSSL $LIBRESSL_VER from source "
 			echo ""
 			while [[ $SSL != "1" && $SSL != "2" && $SSL != "3" ]]; do
-				read -p "Select an option [1-3]: " SSL
+				read -rp "Select an option [1-3]: " SSL
 			done
 		fi
 		case $SSL in
@@ -138,13 +138,13 @@ case $OPTION in
 			# install libmaxminddb
 			wget https://github.com/maxmind/libmaxminddb/releases/download/${LIBMAXMINDDB_VER}/libmaxminddb-${LIBMAXMINDDB_VER}.tar.gz
 			tar xaf libmaxminddb-${LIBMAXMINDDB_VER}.tar.gz
-			cd libmaxminddb-${LIBMAXMINDDB_VER}/
+			cd libmaxminddb-${LIBMAXMINDDB_VER}/ || exit
 			./configure
 			make
 			make install
 			ldconfig
 
-			cd ../
+			cd ../ || exit
 			wget https://github.com/leev/ngx_http_geoip2_module/archive/${GEOIP2_VER}.tar.gz
 			tar xaf ${GEOIP2_VER}.tar.gz
 
@@ -155,10 +155,10 @@ case $OPTION in
 			tar -xf GeoLite2-City.tar.gz
 			tar -xf GeoLite2-Country.tar.gz
 			mkdir /opt/geoip
-			cd GeoLite2-City_*/
+			cd GeoLite2-City_*/ || exit
 			mv GeoLite2-City.mmdb /opt/geoip/
-			cd ../
-			cd GeoLite2-Country_*/
+			cd ../ || exit
+			cd GeoLite2-Country_*/ || exit
 			mv GeoLite2-Country.mmdb /opt/geoip/
 		fi
 
@@ -189,7 +189,7 @@ case $OPTION in
 			cd /usr/local/src/nginx/modules || exit 1
 			wget https://www.openssl.org/source/openssl-${OPENSSL_VER}.tar.gz
 			tar xaf openssl-${OPENSSL_VER}.tar.gz
-			cd openssl-${OPENSSL_VER}
+			cd openssl-${OPENSSL_VER} || exit
 
 			./config
 		fi
@@ -197,7 +197,7 @@ case $OPTION in
 		# Download and extract of Nginx source code
 		cd /usr/local/src/nginx/ || exit 1
 		wget -qO- https://nginx.org/download/nginx-${NGINX_VER}.tar.gz | tar zxf -
-		cd nginx-${NGINX_VER}
+		cd nginx-${NGINX_VER} || exit
 
 		# As the default nginx.conf does not work, we download a clean and working conf from my GitHub.
 		# We do it only if it does not already exist, so that it is not overriten if Nginx is being updated
@@ -266,7 +266,7 @@ case $OPTION in
 			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo --add-module=/usr/local/src/nginx/modules/nginx-module-vts)
 		fi
 
-		./configure $NGINX_OPTIONS $NGINX_MODULES
+		./configure "$NGINX_OPTIONS" "$NGINX_MODULES"
 		make -j "$(nproc)"
 		make install
 
@@ -323,10 +323,10 @@ case $OPTION in
 	2) # Uninstall Nginx
 		if [[ "$HEADLESS" != "y" ]]; then
 			while [[ $RM_CONF !=  "y" && $RM_CONF != "n" ]]; do
-				read -p "       Remove configuration files ? [y/n]: " -e RM_CONF
+				read -rp "       Remove configuration files ? [y/n]: " -e RM_CONF
 			done
 			while [[ $RM_LOGS !=  "y" && $RM_LOGS != "n" ]]; do
-				read -p "       Remove logs files ? [y/n]: " -e RM_LOGS
+				read -rp "       Remove logs files ? [y/n]: " -e RM_LOGS
 			done
 		fi
 		# Stop Nginx
