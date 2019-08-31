@@ -2,7 +2,7 @@
 
 Compile and install Nginx from source with optional modules. A fork from angristan's [nginx-autoinstall](https://github.com/Angristan/nginx-autoinstall)
 
-![screenshot](https://user-images.githubusercontent.com/11699655/33800227-29565ef6-dd3c-11e7-9967-7232ecd36ee4.png)
+![Overview](https://i.imgur.com/8SocecU.png)
 
 ## Compatibility
 
