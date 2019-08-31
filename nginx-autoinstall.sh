@@ -376,7 +376,7 @@ case $OPTION in
 		# Remove conf & OWASP files
 		if [[ "$RM_CONF" = 'y' ]]; then
 			rm -r /etc/nginx/ \
-			/usr/local/owasp-modsecurity \
+			/usr/local/owasp-modsecurity
 		fi
 
 		# Remove logs
