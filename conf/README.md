@@ -1,36 +1,5 @@
 # Configurations files
 
-## PageSpeed
-
-Add this in your http block:
-
-```nginx
-pagespeed on;
-pagespeed StatisticsPath /ngx_pagespeed_statistics;
-pagespeed GlobalStatisticsPath /ngx_pagespeed_global_statistics;
-pagespeed MessagesPath /ngx_pagespeed_message;
-pagespeed ConsolePath /pagespeed_console;
-pagespeed AdminPath /pagespeed_admin;
-pagespeed GlobalAdminPath /pagespeed_global_admin;
-# Needs to exist and be writable by nginx.
-# Use tmpfs for best performance.
-pagespeed FileCachePath /var/ngx_pagespeed_cache;
-```
-
-More info here : https://angristan.fr/compiler-installer-nginx-module-pagespeed-debian/
-
-## Brotli
-
-Add this in your http block :
-
-```nginx
-brotli on;
-brotli_static on;
-brotli_buffers 16 8k;
-brotli_comp_level 6;
-brotli_types *;
-```
-
 ## LibreSSL / OpenSSL 1.1+
 
 You can now use ChaCha20 in addition to AES. Add this in your server block:
@@ -59,3 +28,8 @@ TLS- can be TLS13-.
 ## GeoIP 2
 
 See https://github.com/leev/ngx_http_geoip2_module#example-usage
+
+
+## ModSecurity
+
+See this [tutorial](https://www.nginx.com/blog/compiling-and-installing-modsecurity-for-open-source-nginx/) for a rough overview on how to configure ModSecurity
