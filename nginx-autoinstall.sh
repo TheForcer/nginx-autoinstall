@@ -286,6 +286,27 @@ case $OPTION in
 		make install
 
 		if [[ "$MODSEC" = 'y' ]]; then
+			# Download and compile ModSecurity source code to /usr/local/modsecurity
+			if [[ ! -d /usr/local/modsecurity ]]
+			then
+				git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity
+				cd ModSecurity || exit 1
+				git submodule init
+				git submodule update
+				./build.sh
+				./configure
+				echo ""
+				echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+				echo "The following steps could take a while, as the ModSecurity code has to be compiled"
+				echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+				echo ""
+				sleep 5
+				make
+				make install
+				cd .. || exit
+				rm -r ModSecurity
+			fi
+			# Compile and install the nginx ModSecurity module
 			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo "--add-dynamic-module=/usr/local/src/nginx/modules/modsecurity-nginx")
 			./configure $NGINX_OPTIONS $NGINX_MODULES
 			make modules
