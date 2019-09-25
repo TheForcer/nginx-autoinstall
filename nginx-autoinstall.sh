@@ -22,6 +22,7 @@ if [[ "$HEADLESS" == "y" ]]; then
 	FANCYINDEX=${FANCYINDEX:-n}
 	CACHEPURGE=${CACHEPURGE:-n}
 	WEBDAV=${WEBDAV:-n}
+	MODSEC=${MODSEC:-n}
 	VTS=${VTS:-n}
 	SSL=${SSL:-1}
 	RM_CONF=${RM_CONF:-y}
