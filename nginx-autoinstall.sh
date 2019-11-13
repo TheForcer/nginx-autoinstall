@@ -11,7 +11,7 @@ NGINX_STABLE_VER=1.16.1
 LIBRESSL_VER=3.0.2
 OPENSSL_VER=1.1.1d
 LIBMAXMINDDB_VER=1.3.2
-GEOIP2_VER=3.2
+GEOIP2_VER=3.3
 OWASP_VER=3.2.0
 
 # Define installation paramaters for headless install (fallback if unspecifed)
