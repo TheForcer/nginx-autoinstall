@@ -156,8 +156,8 @@ case $OPTION in
 
 			mkdir geoip-db
 			cd geoip-db || exit 1
-			wget https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz
-			wget https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.tar.gz
+			wget https://theforcer.de/geoip/GeoLite2-City_20191224.tar.gz -O GeoLite2-City.tar.gz
+			wget https://theforcer.de/geoip/GeoLite2-Country_20191224.tar.gz -O GeoLite2-Country.tar.gz
 			tar -xf GeoLite2-City.tar.gz
 			tar -xf GeoLite2-Country.tar.gz
 			mkdir /opt/geoip
