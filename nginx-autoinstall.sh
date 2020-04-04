@@ -146,7 +146,7 @@ case $OPTION in
 			tar xaf libmaxminddb-${LIBMAXMINDDB_VER}.tar.gz
 			cd libmaxminddb-${LIBMAXMINDDB_VER}/ || exit
 			./configure
-			make
+			make -j "$(nproc)"
 			make install
 			ldconfig
 
@@ -302,7 +302,7 @@ case $OPTION in
 				echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 				echo ""
 				sleep 5
-				make
+				make -j "$(nproc)"
 				make install
 				cd .. || exit
 				rm -r ModSecurity
