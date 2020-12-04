@@ -28,6 +28,7 @@ Compile and install Nginx from source with optional modules. A fork from angrist
 * [ngx_cache_purge](https://github.com/FRiCKLE/ngx_cache_purge) (Purge content from FastCGI, proxy, SCGI and uWSGI caches)
 * [ngx-fancyindex](https://github.com/aperezdc/ngx-fancyindex) (Fancy indexes module)
 * [nginx-dav-ext-module](https://github.com/arut/nginx-dav-ext-module) (nginx WebDAV PROPFIND,OPTIONS,LOCK,UNLOCK support)
+* [nginx-rtmp-module](https://github.com/arut/nginx-rtmp-module) (nginx support for streaming protocols (HLS, DASH))
 * [nginx-module-vts](https://github.com/vozlt/nginx-module-vts) (Nginx virtual host traffic status module )
   - See install instructions: [nginx-module-vts](https://github.com/vozlt/nginx-module-vts#installation) 
 * [ModSecurity 3.0](https://github.com/SpiderLabs/ModSecurity-nginx) (nginx WAF, block malicious traffic)

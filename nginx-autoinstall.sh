@@ -22,6 +22,7 @@ if [[ "$HEADLESS" == "y" ]]; then
 	FANCYINDEX=${FANCYINDEX:-n}
 	CACHEPURGE=${CACHEPURGE:-n}
 	WEBDAV=${WEBDAV:-n}
+	RTMP=${RTMP:-n}
 	MODSEC=${MODSEC:-n}
 	VTS=${VTS:-n}
 	SSL=${SSL:-1}
@@ -94,6 +95,9 @@ case $OPTION in
 			while [[ $WEBDAV != "y" && $WEBDAV != "n" ]]; do
 				read -rp "       nginx WebDAV [y/n]: " -e WEBDAV
 			done
+			while [[ $RTMP != "y" && $RTMP != "n" ]]; do
+				read -rp "       nginx RTMP [y/n]: " -e RTMP
+			done			
 			while [[ $VTS != "y" && $VTS != "n" ]]; do
 				read -rp "       nginx VTS [y/n]: " -e VTS
 			done
@@ -271,6 +275,11 @@ case $OPTION in
 			git clone --quiet https://github.com/aperezdc/ngx-fancyindex.git /usr/local/src/nginx/modules/fancyindex
 			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo --add-module=/usr/local/src/nginx/modules/fancyindex)
 		fi
+
+		if [[ "$RTMP" = 'y' ]]; then
+			git clone --quiet git clone https://github.com/arut/nginx-rtmp-module.git /usr/local/src/nginx/modules/rtmp
+			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo --add-module=/usr/local/src/nginx/modules/rtmp)
+		fi		
 		
 		if [[ "$WEBDAV" = 'y' ]]; then
 			git clone --quiet https://github.com/arut/nginx-dav-ext-module.git /usr/local/src/nginx/modules/nginx-dav-ext-module
