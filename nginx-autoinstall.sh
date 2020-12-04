@@ -277,7 +277,7 @@ case $OPTION in
 		fi
 
 		if [[ "$RTMP" = 'y' ]]; then
-			git clone --quiet git clone https://github.com/arut/nginx-rtmp-module.git /usr/local/src/nginx/modules/rtmp
+			git clone --quiet https://github.com/arut/nginx-rtmp-module.git /usr/local/src/nginx/modules/rtmp
 			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo --add-module=/usr/local/src/nginx/modules/rtmp)
 		fi		
 		
