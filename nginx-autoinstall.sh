@@ -440,13 +440,14 @@ case $OPTION in
 			echo "You need to install nginx with the ModSecurity 3 module beforehand."
 			exit
 		fi
-		wget -O owasp-modsecurity.tar.gz https://github.com/SpiderLabs/owasp-modsecurity-crs/archive/v${OWASP_VER}.tar.gz
+		wget -O owasp-modsecurity.tar.gz https://github.com/coreruleset/coreruleset/archive/v${OWASP_VER}.tar.gz
 		tar -xf owasp-modsecurity.tar.gz
-		mv owasp-modsecurity-crs-${OWASP_VER} /usr/local/owasp-modsecurity
+		mv coreruleset-${OWASP_VER} /usr/local/owasp-modsecurity
 		rm owasp-modsecurity.tar.gz
 		cd /usr/local/owasp-modsecurity || exit
 		cp crs-setup.conf.example crs-setup.conf
 		mv rules/REQUEST-910-IP-REPUTATION.conf rules/REQUEST-910-IP-REPUTATION.conf.example
+		rm rules/RESPONSE-95*
 		wget -O /etc/nginx/modsec/main.conf https://raw.githubusercontent.com/theforcer/nginx-autoinstall/master/conf/main.conf
 		nginx -s reload
 		echo ""
